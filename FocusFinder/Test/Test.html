@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FocusFinder</title>
+    <link rel="shortcut icon" href="../Element/Image/Logo.svg" type="image/x-icon">
+    <link rel="stylesheet" href="../Element/Style/Style.css">
+    <script>
+        const titles = ['FocusFinder', 'Test du Clignement Attentionnel'];
+        let index = 0;
+
+        setInterval(function () {
+            document.title = titles[index++ % titles.length];
+        }, 2500);
+	</script>
+</head>
+<body>
+    <script>
+        var Nombre_test = 50;
+        var Delay = 50;
+        var element_test = [];
+        var Reponse_test = [];
+        var test_numero = 1;
+
+        function Contenue_element_test() {
+            let Element_1 = Math.floor(Math.random() * 3) + 9;
+            let Distance = Math.floor(Math.random() * 12) + 3;
+            Reponse_test[test_numero - 1] = [];
+
+            for (let i = 0; i < 28; i++) {
+                
+                if (i + 1 == Element_1) {
+                    element_test[i] = Math.floor(Math.random() * 9) + 1;
+                    Reponse_test[test_numero - 1][0] = element_test[i];
+                    Reponse_test[test_numero - 1][3] = Element_1;
+                    Reponse_test[test_numero - 1][4] = Element_1 + Distance;
+                    Reponse_test[test_numero - 1][5] = Distance;
+                } else if (i + 1 == Element_1 + Distance) {
+                    element_test[i] = Math.floor(Math.random() * 9) + 1;
+                    Reponse_test[test_numero - 1][1] = element_test[i];
+                } else {
+                    let valeur = Math.floor(Math.random() * 26) + 1;
+                    element_test[i] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".substring(valeur-1, valeur);
+                }
+            }
+        }
+        
+        function Debut_test() {
+            Contenue_element_test();
+
+            document.getElementById('Resulta-test').style.display = "none";
+            document.getElementById('Message-test').style.display = "none";
+            document.getElementById('Bouton-Test').style.display = "none";
+            document.getElementById('Lettre-test').style.display = "block";
+
+            setTimeout(function() {
+                for (var i = 0; i < 28 + 1; i++) {
+                    setTimeout(function(i) {
+                        Test(i);
+                    }, i * Delay, i);
+                }
+            }, 500);
+        }
+
+        function Test(Nombre) {
+            let Lettre_test = document.getElementById('Lettre-test');
+
+            if (Nombre >= 28) {
+                Lettre_test.style.display = "none";
+                Lettre_test.innerHTML = "";
+                document.getElementById('Message-test').style.display = "flex";
+                Touche_test_statut = true;
+            } else {
+                Lettre_test.innerHTML = element_test[Nombre];
+            }
+        }
+
+        var Touche_test_statut = false;
+        document.addEventListener('keydown', function(event) {
+            var keyPressed = event.key;
+
+            if (Touche_test_statut) {
+                if ((keyPressed >= '1' && keyPressed <= '9' && event.location === KeyboardEvent.DOM_KEY_LOCATION_NUMPAD) || (keyPressed >= '1' && keyPressed <= '9' && event.location === KeyboardEvent.DOM_KEY_LOCATION_STANDARD)) {
+                    Touche_test_statut = false;
+                    Reponse_test[test_numero - 1][2] = keyPressed;
+
+                    test_numero++;
+                    
+                    if (test_numero <= Nombre_test) {
+                        Debut_test();
+                    } else {
+                        Fin_test();
+                    }
+                }
+            }
+        });
+
+        function Fin_test() {
+            document.getElementById('Message-test').style.display = "none";
+
+            for (let i = 0; i < Nombre_test; i++) {
+                Reponse_test[i][6] = (Reponse_test[i][5] <= 2) ? 0 : 1;
+                Reponse_test[i][6] = (Reponse_test[i][6] == 0) ? 0 : ((Reponse_test[i][1] != Reponse_test[i][2]) ? 1 : 0);
+            }
+            
+            Reponse_test[Nombre_test] = 0;
+            for (let i = 0; i < Reponse_test.length; i++) {
+                if (Reponse_test[i][6] == 1) {
+                    Reponse_test[Nombre_test]++;
+                }
+
+                Reponse_test[i][6] = (Reponse_test[i][6] == 1) ? 0 : 1;
+            }
+
+            let body_tableau_test = document.getElementById('body-tableau-test');
+
+            for (let i = 0; i < Nombre_test; i++) {
+                let tr_test = document.createElement('tr');
+
+                for (let j = 0; j < 7; j++) {
+                    let td_test = document.createElement('td');
+                    td_test.innerHTML = Reponse_test[i][j];
+                    if (j == 6) {
+                        td_test.style.background = (Reponse_test[i][j] == 1) ? "green" : "red";
+                    }
+
+                    tr_test.appendChild(td_test);
+                }
+                body_tableau_test.appendChild(tr_test);
+            }
+
+            let tr_test = document.createElement('tr');
+            let td_test = document.createElement('td');
+            td_test.setAttribute("colspan", 6);
+            td_test.innerHTML = "Total";
+            td_test.setAttribute("style", "Text-align: right;")
+            tr_test.appendChild(td_test);
+            td_test = document.createElement('td');
+            td_test.innerHTML = Nombre_test - Reponse_test[Nombre_test];
+
+            if ((Nombre_test - Reponse_test[Nombre_test]) <= (Nombre_test / 3)) {
+                td_test.style.backgroundColor = "red";
+            } else if (((Nombre_test - Reponse_test[Nombre_test]) > (Nombre_test / 3)) && ((Nombre_test - Reponse_test[Nombre_test]) < (Nombre_test / 3) * 2)) {
+                td_test.style.backgroundColor = "orange";
+            } else {
+                td_test.style.backgroundColor = "green";
+            }
+
+            tr_test.appendChild(td_test);
+            body_tableau_test.appendChild(tr_test);
+
+            document.getElementById('Resulta-test').style.display = "flex";
+        }
+    </script>
+
+    <script>
+        var email = localStorage.getItem("data1");
+        var password = localStorage.getItem("data2");
+        localStorage.removeItem("data1");
+        localStorage.removeItem("data2");
+
+        function Envoye_donnee_test(email, motdepasse, score) {
+
+
+            var xhttp = new XMLHttpRequest(); // requete HTTP POST pour tester des information dans un script PHP
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    // ----
+                }
+            };
+            xhttp.open("GET", "../Element/DB/Envoye_donnee_test.php?email=" + encodeURIComponent(email) + "&mdp=" + encodeURIComponent(motdepasse) + "&score=" + encodeURIComponent(score), true);
+            xhttp.send();
+        }
+    </script>
+
+    <div id="Div-test">
+        <div id="Bouton-Test">
+            <p>Une série de lettres en succession rapide avec deux chiffres (entre 1 et 9) intercalés. Vous devez vous souvenir du <strong>deuxième</strong> chiffre.</p>
+            <button onclick="Debut_test()">Lancer le test</button>
+        </div>
+        <div id="Lettre-test" style="display: none;"></div>
+        <div id="Message-test" style="display: none;">Quel était le deuxième nombre? Appuyez sur la touche correspondant au chiffre.</div>
+        <div id="Resulta-test" style="display: none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Premier nombre</th>
+                        <th>Deuxième nombre</th>
+                        <th>Utilisateur nombre</th>
+                        <th>Premier emplacement</th>
+                        <th>Deuxième emplacement</th>
+                        <th>Écart</th>
+                        <th>Résulta</th>
+                    </tr>
+                </thead>
+                <tbody id="body-tableau-test"></tbody>
+            </table>
+            <div>
+                <button onclick="window.close()">Quitter</button>
+                <button onclick="element_test = []; Reponse_test = []; test_numero = 1; document.getElementById('body-tableau-test').innerHTML = ''; document.getElementById('Resulta-test').style.display = 'none'; document.getElementById('Message-test').style.display = 'none'; document.getElementById('Bouton-Test').style.display = 'flex'; document.getElementById('Bouton-enregistrer-test').setAttribute('onclick', 'this.removeAttribute(\'onclick\'); console.log(\'Données enregistrer\'); this.style.background = \'#0b6a00\'; this.style.color = \'#ffffff\'; Envoye_donnee_test(email, password, (((Nombre_test - Reponse_test[Nombre_test]) / Nombre_test) * 50))'); document.getElementById('Bouton-enregistrer-test').style.background = '#ffffff00'; document.getElementById('Bouton-enregistrer-test').style.color = '#0b6a00'; document.getElementById('Lettre-test').style.display = 'none';">Recommencer</button>
+                <button id="Bouton-enregistrer-test" onclick="this.removeAttribute('onclick'); console.log('Données enregistrer'); this.style.background = '#0b6a00'; this.style.color = '#ffffff'; Envoye_donnee_test(email, password, (((Nombre_test - Reponse_test[Nombre_test]) / Nombre_test) * 50))">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
